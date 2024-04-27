@@ -167,8 +167,124 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
 
 ​	指Spring创建对象的过程中将对象依赖属性通过配置进行注入
 
-	1. set注入
-	1. 构造注入
+ 1. set注入
+
+    1.1 创建一个类 定义属性 生成属性set方法
+
+    ```java
+    private String bName; //书名
+    private String author; //作者
+    
+    public Book() {}
+    
+    public Book(String bName, String author) {
+        this.bName = bName;
+        this.author = author;
+    }
+    
+    public String getbName() {
+        return bName;
+    }
+    
+    public String getAuthor() {
+        return author;
+    }
+    
+    public void setbName(String bName) {
+        this.bName = bName;
+    }
+    
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+    ```
+
+    1.2 在spring配置文件配置
+
+    ```xml
+    <!-- 1. 基于 set 方法完成注入 -->
+    <bean id="book" class="com.sunl19ht.spring6.iocxml.di.Book">
+    	<!-- name：为get set方法对应的名字 首字母小写 -->   
+        <property name="bName" value="Spring 5.0 开发指南"/>
+        <property name="author" value="孙龙"/>
+    </bean>
+    ```
+
+    ```java
+    @Test
+    public void testSet() {
+        ApplicationContext context = new ClassPathXmlApplicationContext("bean-di.xml");
+        Book book = context.getBean(Book.class);
+        System.out.println(book);
+    }
+    ```
+
+ 2. 构造注入
+
+    创建类 定义属性 生成有参构造
+
+    ```java
+    public Book(String bName, String author) {
+        this.bName = bName;
+        this.author = author;
+    }
+    ```
+
+    
+
+    进行配置
+
+    ```xml
+    <!-- 2. 构造器注入 -->
+    <bean id="bookCon" class="com.sunl19ht.spring6.iocxml.di.Book">
+        <constructor-arg name="bName" value="Spring 5.0 开发指南"/>
+        <!-- 可以通过index指定参数位置 -->
+        <!-- <constructor-arg index="0" value="Spring 5.0 开发指南"/> </constructor-arg>-->
+    
+        <constructor-arg name="author" value="孙龙"/>
+    </bean>
+    ```
+
+    #### 特殊值处理
+
+    1. 字面量赋值
+
+       ```java
+       int a = 10;
+       String b = "abc";
+       ```
+
+    2. null值
+
+       ```xml
+           <bean id="book" class="com.sunl19ht.spring6.iocxml.di.Book">
+               <property name="others">
+                   <null/>
+               </property>
+           </bean>
+       ```
+
+    3. xml实体
+
+       ```xml
+       <property name="others" value="&lt;&gt;"/>
+       ```
+
+       ```java
+       String others = "<>"
+       ```
+
+    4. CDATA节
+
+       ```xml
+       <property name="others">
+       	<value>
+               <![CDATA[a < b]]>
+           </value>
+       </property>
+       ```
+
+       
 
 #### IoC容器在Spring的实现
 
@@ -253,3 +369,144 @@ public static void main(String[] args) {
 ```
 
  如果一个接口有多个实现类并且配置了bean则会报错 bean不唯一
+
+#### 特殊类型属性注入（对象类型属性注入，Map类型）
+
+```java
+public class Dept {
+    //部门名称
+    private String dName;
+    public void info() {
+        System.out.println("部门名称：" + dName);
+    }
+}
+public class Emp {
+    //标识员工属于某个部门
+    private Dept dept;
+    private String eName;
+    private Integer age;
+
+    public void work() {
+        System.out.println("员工" + eName + "年龄" + age + "正在工作");
+    }
+}
+```
+
+ 1. 引用外部Bean
+
+    ```xml
+    <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+        <property name="dName" value="财务部"/>
+    </bean>
+    <bean id="emp" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="张三"/>
+        <property name="age" value="18"/>
+        <!-- 对象类型注入 name：setDept首字母小写 ref：bean的id值-->
+        <property name="dept" ref="dept"/>
+    </bean>
+    ```
+
+ 2. 内部Bean
+
+    ```xml
+    <!--
+    方式2：内部bean注入
+    	将bean的定义卸载 property里面
+    -->
+    <bean id="emp2" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="李四"/>
+        <property name="age" value="20"/>
+        <property name="dept">
+            <bean id="dept2" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+                <property name="dName" value="管理部"/>
+            </bean>
+        </property>
+    </bean>
+    ```
+
+ 3. 级联属性赋值
+
+    ```xml
+    <!--
+    方式3：级联赋值
+    -->
+    <bean id="dept3" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+    	<property name="dName" value="开发部"/>
+    </bean>
+    <bean id="emp3" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="Tom"/>
+        <property name="age" value="30"/>
+        <property name="dept" ref="dept3"/>
+        <property name="dept.dname" value="测试部"/>
+    </bean>
+    ```
+
+  #### 数组类型注入
+
+```xml
+<bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+	<property name="dName" value="技术部"/>
+</bean>
+<bean id="emp" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+	<!-- 普通属性 -->
+	<property name="eName" value="张三"/>
+	<property name="age" value="18"/>
+	<!-- 对象类型属性 -->
+	<property name="dept" ref="dept"/>
+	<!-- 注入数组类型 -->
+	<property name="loves">
+        <array>
+            <value>吃饭</value>
+            <value>睡觉</value>
+            <value>Codeing</value>
+        </array>
+	</property>
+</bean>
+```
+  #### 集合属性注入
+
+```xml
+<bean id="emp1" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="张三"/>
+        <property name="age" value="18"/>
+        <property name="loves">
+            <list>
+                <value>吃饭</value>
+                <value>睡觉</value>
+                <value>Coding...</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="emp2" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="李四"/>
+        <property name="age" value="20"/>
+        <property name="loves">
+            <list>
+                <value>抽烟</value>
+                <value>喝酒</value>
+                <value>烫头</value>
+                <value>Coding...</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+        <property name="dName" value="技术部"/>
+        <!-- 注入集合 -->
+        <property name="empList">
+            <list>
+                <!-- 如果是String类型可以写value -->
+                <ref bean="emp1"/>
+                <ref bean="emp2"/>
+            </list>
+        </property>
+    </bean>
+```
+
+
+
+
+
+
+

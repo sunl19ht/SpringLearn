@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+        <!-- 完成User对象创建
+             bean标签
+                id属性：唯一标识 用于取出对象 一般类名首字母小写
+                class属性：类所在的全路径(包名称+类名称)-->
+        <bean id="user" class="com.sunl19ht.spring6.User"> </bean>
+</beans>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 1. 创建User类的对象 -->
+    <bean id="user" class="com.sunl19ht.spring6.iocxml.User"></bean>
+
+    <bean id="user1" class="com.sunl19ht.spring6.iocxml.User"></bean>
+
+    <!-- 2. 一个接口实现类获取过程 -->
+    <bean id="userDaoImpl" class="com.sunl19ht.spring6.iocxml.bean.UserDaoImpl"></bean>
+    <bean id="personDaoImpl" class="com.sunl19ht.spring6.iocxml.bean.PersonDaoImpl"></bean>
+</beans>

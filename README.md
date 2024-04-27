@@ -503,7 +503,103 @@ public class Emp {
         </property>
     </bean>
 ```
+#### Map类型注入
+```xml
+ <!-- 创建老师对象 -->
+<bean id="teacher1" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
+    <property name="teacherId" value="1"/>
+    <property name="teacherName" value="张老师"/>
+</bean>
+<bean id="teacher2" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
+    <property name="teacherId" value="2"/>
+    <property name="teacherName" value="李老师"/>
+    </bean>
+    <!-- 创建学生对象 -->
+    <bean id="student1" class="com.sunl19ht.spring6.iocxml.dimap.Student">
+    <property name="sID" value="1"/>
+    <property name="sName" value="张三"/>
+    <!-- 注入 map集合 -->
+    <property name="teacherMap">
+        <!-- 注入 map集合 -->
+<!--        <map>-->
+<!--            <entry key="1" value-ref="teacher1"/>-->
+<!--            <entry key="2" value-ref="teacher2"/>-->
+<!--        </map>-->
+        <map>
+            <entry>
+                <key>
+                    <value>1</value> <!-- 指定key值 -->
+                </key>>
+                <ref bean="teacher1"/> <!-- 指定value值 -->
+            </entry>
+            <entry>
+                <key>
+                    <value>2</value> <!-- 指定key值 -->
+                </key>>
+                <ref bean="teacher2"/> <!-- 指定value值 -->
+            </entry>
+        </map>>
+    </property>
+</bean>
+```
+#### 引用集合类型的bean
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util.xsd
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--
+        1. 创建三个对象
+        2. 注入普通类型属性
+        3. 使用util：类型 定义
+        4. 在学生bean引入util：定义bean 完成list map属性注入
+    -->
+    <util:list id="lessonList">
+        <ref bean="lesson1"/>
+        <ref bean="lesson2"/>
+    </util:list>
+    <util:map id="teacherMap">
+        <entry>
+            <key>
+                <value>10010</value>
+            </key>
+            <ref bean="teacher1"></ref>
+        </entry>
+        <entry>
+            <key>
+                <value>10086</value>
+            </key>
+            <ref bean="teacher2"></ref>
+        </entry>
+    </util:map>
+    <bean id="lesson1" class="com.sunl19ht.spring6.iocxml.dimap.Lesson">
+        <property name="lessonName" value="java开发"/>
+    </bean>
+    <bean id="lesson2" class="com.sunl19ht.spring6.iocxml.dimap.Lesson">
+        <property name="lessonName" value="前端开发"/>
+    </bean>
 
+    <bean id="teacher1" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
+        <property name="teacherId" value="100"/>
+        <property name="teacherName" value="张老师"/>
+    </bean>
+    <bean id="teacher2" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
+        <property name="teacherId" value="200"/>
+        <property name="teacherName" value="李老师"/>
+    </bean>
+    
+    <bean id="student" class="com.sunl19ht.spring6.iocxml.dimap.Student">
+        <property name="sID" value="1001"/>
+        <property name="sName" value="张三"/>
+        <property name="lessonsList" ref="lessonList"/>
+        <property name="teacherMap" ref="teacherMap"/>
+    </bean>
+</beans>
+```
 
 
 

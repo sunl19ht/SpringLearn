@@ -3,4 +3,38 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <bean id="emp1" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="张三"/>
+        <property name="age" value="18"/>
+        <property name="loves">
+            <list>
+                <value>吃饭</value>
+                <value>睡觉</value>
+                <value>Coding...</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="emp2" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="李四"/>
+        <property name="age" value="20"/>
+        <property name="loves">
+            <list>
+                <value>抽烟</value>
+                <value>喝酒</value>
+                <value>烫头</value>
+                <value>Coding...</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+        <property name="dName" value="技术部"/>
+        <property name="empList">
+            <list>
+                <ref bean="emp1"/>
+                <ref bean="emp2"/>
+            </list>
+        </property>
+    </bean>
 </beans>

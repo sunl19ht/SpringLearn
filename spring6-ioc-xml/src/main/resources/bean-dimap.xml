@@ -2,5 +2,26 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 创建老师对象 -->
+    <bean id="teacher1" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
+        <property name="teacherId" value="1"/>
+        <property name="teacherName" value="张老师"/>
+    </bean>
+    <bean id="teacher2" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
+        <property name="teacherId" value="2"/>
+        <property name="teacherName" value="李老师"/>
+    </bean>
+    <!-- 创建学生对象 -->
+    <bean id="student" class="com.sunl19ht.spring6.iocxml.dimap.Student">
+        <property name="sID" value="1"/>
+        <property name="sName" value="张三"/>
+        <!-- 注入 map集合 -->
+        <property name="teacherMap">
+            <map>
+                <entry key="1" value-ref="teacher1"/>
+                <entry key="2" value-ref="teacher2"/>
+            </map>
+        </property>
+    </bean>
 
 </beans>

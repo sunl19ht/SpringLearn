@@ -3,4 +3,23 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <!-- 注入数组类型的属性 -->
+    <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+        <property name="dName" value="技术部"/>
+    </bean>
+    <bean id="emp" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <!-- 普通属性 -->
+        <property name="eName" value="张三"/>
+        <property name="age" value="18"/>
+        <!-- 对象类型属性 -->
+        <property name="dept" ref="dept"/>
+        <!-- 注入数组类型 -->
+        <property name="loves">
+            <array>
+                <value>吃饭</value>
+                <value>睡觉</value>
+                <value>Codeing</value>
+            </array>
+        </property>
+    </bean>
 </beans>

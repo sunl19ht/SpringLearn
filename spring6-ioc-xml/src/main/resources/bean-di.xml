@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!-- 1. 基于 set 方法完成注入 -->
+    <bean id="book" class="com.sunl19ht.spring6.iocxml.di.Book">
+        <property name="bName" value="Spring 5.0 开发指南"/>
+        <property name="author" value="孙龙"/>
+<!--        <property name="others">-->
+<!--            <null/>-->
+<!--        </property>-->
+<!--        <property name="others" value="&lt;&gt;"/>-->
+        <property name="others">
+            <value>
+                <![CDATA[a < b]]>
+            </value>
+        </property>
+    </bean>
+
+    <!-- 2. 构造器注入 -->
+    <bean id="bookCon" class="com.sunl19ht.spring6.iocxml.di.Book">
+        <constructor-arg name="bName" value="Spring 5.0 开发指南"/>
+        <!-- 可以通过index指定参数位置 -->
+        <!-- <constructor-arg index="0" value="Spring 5.0 开发指南"/> </constructor-arg>-->
+
+        <constructor-arg name="author" value="孙龙"/>
+    </bean>
+</beans>

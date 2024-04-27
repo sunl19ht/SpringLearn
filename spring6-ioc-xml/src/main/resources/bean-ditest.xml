@@ -2,5 +2,45 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <!--
+    方式1：引入外部bean
+        1. 创建两个类的对象 dept和emp
+        2. 在emp的bean标签里使用property引入dept的bean
+    -->
+<!--    <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">-->
+<!--        <property name="dName" value="财务部"/>-->
+<!--    </bean>-->
+<!--    <bean id="emp" class="com.sunl19ht.spring6.iocxml.ditest.Emp">-->
+<!--        <property name="eName" value="张三"/>-->
+<!--        <property name="age" value="18"/>-->
+<!--        &lt;!&ndash; 对象类型注入 &ndash;&gt;-->
+<!--        <property name="dept" ref="dept"/>-->
+<!--    </bean>-->
 
+    <!--
+    方式2：内部bean注入
+    -->
+<!--    <bean id="emp2" class="com.sunl19ht.spring6.iocxml.ditest.Emp">-->
+<!--        <property name="eName" value="李四"/>-->
+<!--        <property name="age" value="20"/>-->
+<!--        <property name="dept">-->
+<!--            <bean id="dept2" class="com.sunl19ht.spring6.iocxml.ditest.Dept">-->
+<!--                <property name="dName" value="管理部"/>-->
+<!--            </bean>-->
+<!--        </property>-->
+<!--    </bean>-->
+
+    <!--
+    方式3：级联赋值
+    -->
+    <bean id="dept3" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
+        <property name="dName" value="开发部"/>
+    </bean>
+
+    <bean id="emp3" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
+        <property name="eName" value="Tom"/>
+        <property name="age" value="30"/>
+        <property name="dept" ref="dept3"/>
+        <property name="dept.dName" value="测试部"/>
+    </bean>
 </beans>

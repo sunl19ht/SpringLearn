@@ -600,9 +600,14 @@ public class Emp {
     </bean>
 </beans>
 ```
-
-
-
+#### p命名空间注入
+    导入P命名空间 xmlns:p="http://www.springframework.org/schema/p"
+```xml
+    <!-- p命名空间注入 -->
+    <bean id="studentp" class="com.sunl19ht.spring6.iocxml.dimap.Student" p:sID="100" p:sName="sunl19ht" p:lessonsList-ref="lessonList" p:teacherMap-ref="teacherMap">
+    
+    </bean>
+```
 
 
 

@@ -1,37 +1,39 @@
-## Spring
+# 尚硅谷 Spring 零基础入门到进阶（笔记）BV1kR4y1b7Qc
 
-### P7：入门案例程序开发
+# P7：入门案例程序开发
 
- 1. 创建父工程
+1. 创建父工程
+2. 创建子模块引入spring相关依赖spring-context
 
- 2. 创建子模块 引入spring相关依赖 spring-context
+```xml
+<!-- Spring依赖 -->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>6.0.2</version>
+</dependency>
+```
 
-    ```xml
-    <!-- Spring依赖 -->
-    <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-context</artifactId>
-        <version>6.0.2</version>
-    </dependency>
-    ```
+3.  创建bean.xml文件夹使用bena标签注入对象参数为id对象的唯一标识class对象所在的全路径
 
- 3. 创建bean.xml文件夹 使用bena标签注入对象 参数为 id：对象的唯一标识 class：对象所在的全路径
+4.  加载配置文件 获取bena对象
 
- 4. ClassPathXmlApplication context = new ClassPathXmlApplication()加载配置文件
+```java
+ClassPathXmlApplication context = new ClassPathXmlApplication(); //参数为配置文件名
+Object obj = context.getBean(""); //参数为name
+```
 
- 5. 使用Object obj = context.getBean("")获取对象 参数为name：对象的唯一标识
-
-### P8：入门案例程序分析
+# P8：入门案例程序分析
 
 1. 创建对象，无参构造执行？（执行）
 
-2. 不用new关键字创建对象使用（反射）
+2. 不用 new 关键字创建对象使用（反射）
 
-   2.1 加载bean.xml配置文件
+   2.1 加载 bean.xml 配置文件
 
-   2.2 对xml进行解析
+   2.2 对 xml 进行解析
 
-   2.3 获取xml文件bean标签属性值id class
+   2.3 获取 xml 文件 bean 标签属性值 id class
 
    2.4 使用反射根据类全路径创建对象
 
@@ -39,38 +41,38 @@
    Class<?> clazz = Class.forName("com.sunl19ht.spring6.User");
    //老版本JDK创建对象方法 新版本已过时
    //   Object o = clazz.newInstance();
-   
+
    //新版本创建对象方法
    User user = (User) clazz.getDeclaredConstructor().newInstance();
    System.out.println(user);
    ```
 
-3. 创建对象放在哪里？（IOC容器）
+3. 创建对象放在哪里？（IOC 容器）
 
-```Java
-org.springframework.beans.factory.support.DefaultListableBeanFactory
-private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Map集合
-//key 唯一标识
-//value 类的定义（描述信息：bena的名称 bean是单例/多例 bean的作用域范围）
-```
+    ```Java
+    org.springframework.beans.factory.support.DefaultListableBeanFactory
+    private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Map集合
+    //key 唯一标识
+    //value 类的定义（描述信息：bena的名称 bean是单例/多例 bean的作用域范围）
+    ```
 
-### P9：整合Log4j2日志框架
+# P9：整合 Log4j2 日志框架
 
 1. 日志信息优先级
 
-   ​	TRACE：追踪，最低日志级别
+   ​ TRACE：追踪，最低日志级别
 
-   ​	DEBUG：调试信息
+   ​ DEBUG：调试信息
 
-   ​	INFO：信息 输出重要的信息 使用较多
+   ​ INFO：信息 输出重要的信息 使用较多
 
-   ​	WARN：警告 输出警告的信息
+   ​ WARN：警告 输出警告的信息
 
-   ​	ERROR：错误 输出错误信息
+   ​ ERROR：错误 输出错误信息
 
-   ​	FATAL：严重错误
+   ​ FATAL：严重错误
 
-   级别高的会自动屏蔽级别低的日志 例如设置WARN的知识 则 INFO，DEBUG的日志级别的日志不显示
+   级别高的会自动屏蔽级别低的日志 例如设置 WARN 的知识 则 INFO，DEBUG 的日志级别的日志不显示
 
 2. 日志信息的输出目的地（指定输出到控制台或文件中）
 
@@ -90,56 +92,56 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
    </dependency>
    ```
 
- 4. 加入日志配置文件 在类的根路径下提供log4j2.xml配置文件 （文件名固定为：log4j2.xml，文件必须在根路径下）
+4. 加入日志配置文件 在类的根路径下提供 log4j2.xml 配置文件 （文件名固定为：log4j2.xml，文件必须在根路径下）
 
-    ```xml
-    <?xml version="1.0" encoding="UTF-8"?>
-    <configuration>
-        <loggers>
-            <!--
-                level指定日志级别，从低到高的优先级：
-                    TRACE < DEBUG < INFO < WARN < ERROR < FATAL
-                    trace：追踪，是最低的日志级别，相当于追踪程序的执行
-                    debug：调试，一般在开发中，都将其设置为最低的日志级别
-                    info：信息，输出重要的信息，使用较多
-                    warn：警告，输出警告的信息
-                    error：错误，输出错误信息
-                    fatal：严重错误
-            -->
-            <root level="DEBUG">
-                <appender-ref ref="spring6log"/>
-                <appender-ref ref="RollingFile"/>
-                <appender-ref ref="log"/>
-            </root>
-        </loggers>
-    
-        <appenders>
-            <!--输出日志信息到控制台-->
-            <console name="spring6log" target="SYSTEM_OUT">
-                <!--控制日志输出的格式-->
-                <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss SSS} [%t] %-3level %logger{1024} - %msg%n"/>
-            </console>
-    
-            <!--文件会打印出所有信息，这个log每次运行程序会自动清空，由append属性决定，适合临时测试用-->
-            <File name="log" fileName="d:/spring6_log/test.log" append="false">
-                <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
-            </File>
-    
-            <!-- 这个会打印出所有的信息，
-                每次大小超过size，
-                则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，
-                作为存档-->
-            <RollingFile name="RollingFile" fileName="d:/spring6_log/app.log"
-                         filePattern="log/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
-                <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
-                <SizeBasedTriggeringPolicy size="50MB"/>
-                <!-- DefaultRolloverStrategy属性如不设置，
-                则默认为最多同一文件夹下7个文件，这里设置了20 -->
-                <DefaultRolloverStrategy max="20"/>
-            </RollingFile>
-        </appenders>
-    </configuration>
-    ```
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <configuration>
+       <loggers>
+           <!--
+               level指定日志级别，从低到高的优先级：
+                   TRACE < DEBUG < INFO < WARN < ERROR < FATAL
+                   trace：追踪，是最低的日志级别，相当于追踪程序的执行
+                   debug：调试，一般在开发中，都将其设置为最低的日志级别
+                   info：信息，输出重要的信息，使用较多
+                   warn：警告，输出警告的信息
+                   error：错误，输出错误信息
+                   fatal：严重错误
+           -->
+           <root level="DEBUG">
+               <appender-ref ref="spring6log"/>
+               <appender-ref ref="RollingFile"/>
+               <appender-ref ref="log"/>
+           </root>
+       </loggers>
+
+       <appenders>
+           <!--输出日志信息到控制台-->
+           <console name="spring6log" target="SYSTEM_OUT">
+               <!--控制日志输出的格式-->
+               <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss SSS} [%t] %-3level %logger{1024} - %msg%n"/>
+           </console>
+
+           <!--文件会打印出所有信息，这个log每次运行程序会自动清空，由append属性决定，适合临时测试用-->
+           <File name="log" fileName="d:/spring6_log/test.log" append="false">
+               <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
+           </File>
+
+           <!-- 这个会打印出所有的信息，
+               每次大小超过size，
+               则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，
+               作为存档-->
+           <RollingFile name="RollingFile" fileName="d:/spring6_log/app.log"
+                        filePattern="log/$${date:yyyy-MM}/app-%d{MM-dd-yyyy}-%i.log.gz">
+               <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+               <SizeBasedTriggeringPolicy size="50MB"/>
+               <!-- DefaultRolloverStrategy属性如不设置，
+               则默认为最多同一文件夹下7个文件，这里设置了20 -->
+               <DefaultRolloverStrategy max="20"/>
+           </RollingFile>
+       </appenders>
+   </configuration>
+   ```
 
 5. 手动写日志
 
@@ -150,61 +152,62 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
    logger.info("") //参数为日志内容
    ```
 
-### P11：IoC概述
-   #### IoC（Inversion of Control）控制反转
+# P11：IoC 概述
 
-   Spring通过IoC容器管理所有Java对象的实例化和初始化 在IoC容器管理的对象成为Spring Bean或Bean，它与使用new关键字创建的对象没有任何区别
+## IoC（Inversion of Control）控制反转
 
-   IoC不是一种技术 而是一种思想 对象的创建和销毁都是通过IoC容器管理
+Spring 通过 IoC 容器管理所有 Java 对象的实例化和初始化 在 IoC 容器管理的对象成为 Spring Bean 或 Bean，它与使用 new 关键字创建的对象没有任何区别
 
-1. xml中定义Bean的信息（BeanDefinition）
+IoC 不是一种技术 而是一种思想 对象的创建和销毁都是通过 IoC 容器管理
 
-2. 通过BeanDefinitionReader进行读取配置文件
+1. xml 中定义 Bean 的信息（BeanDefinition）
 
-3. Bean的定义信息加载到IoC容器进行实例化（BeanFactory工厂+反射）初始化对象-->最终对象
+2. 通过 BeanDefinitionReader 进行读取配置文件
 
-#### DI（Dependency Injection）依赖注入
+3. Bean 的定义信息加载到 IoC 容器进行实例化（BeanFactory 工厂+反射）初始化对象-->最终对象
 
-​	指Spring创建对象的过程中将对象依赖属性通过配置进行注入
+## DI（Dependency Injection）依赖注入
 
- 1. set注入
+​ 指 Spring 创建对象的过程中将对象依赖属性通过配置进行注入
 
-    1.1 创建一个类 定义属性 生成属性set方法
+1.  set 注入
+
+    1.1 创建一个类 定义属性 生成属性 set 方法
 
     ```java
     private String bName; //书名
     private String author; //作者
-    
+
     public Book() {}
-    
+
     public Book(String bName, String author) {
         this.bName = bName;
         this.author = author;
     }
-    
+
     public String getbName() {
         return bName;
     }
-    
+
     public String getAuthor() {
         return author;
     }
-    
+
     public void setbName(String bName) {
         this.bName = bName;
     }
-    
+
     public void setAuthor(String author) {
         this.author = author;
     }
     ```
 
-    1.2 在spring配置文件配置
+    1.2 在 spring 配置文件配置
 
     ```xml
     <!-- 1. 基于 set 方法完成注入 -->
     <bean id="book" class="com.sunl19ht.spring6.iocxml.di.Book">
-    	<!-- name：为get set方法对应的名字 首字母小写 -->   
+    	<!-- name：为get set方法对应的名字 首字母小写 -->
         <property name="bName" value="Spring 5.0 开发指南"/>
         <property name="author" value="孙龙"/>
     </bean>
@@ -219,7 +222,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
     }
     ```
 
- 2. 构造注入
+2.  构造注入
 
     创建类 定义属性 生成有参构造
 
@@ -230,8 +233,6 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
     }
     ```
 
-    
-
     进行配置
 
     ```xml
@@ -240,12 +241,12 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
         <constructor-arg name="bName" value="Spring 5.0 开发指南"/>
         <!-- 可以通过index指定参数位置 -->
         <!-- <constructor-arg index="0" value="Spring 5.0 开发指南"/> </constructor-arg>-->
-    
+
         <constructor-arg name="author" value="孙龙"/>
     </bean>
     ```
 
-    #### 特殊值处理
+    ## 特殊值处理
 
     1. 字面量赋值
 
@@ -254,7 +255,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
        String b = "abc";
        ```
 
-    2. null值
+    2. null 值
 
        ```xml
            <bean id="book" class="com.sunl19ht.spring6.iocxml.di.Book">
@@ -264,7 +265,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
            </bean>
        ```
 
-    3. xml实体
+    3. xml 实体
 
        ```xml
        <property name="others" value="&lt;&gt;"/>
@@ -274,7 +275,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
        String others = "<>"
        ```
 
-    4. CDATA节
+    4. CDATA 节
 
        ```xml
        <property name="others">
@@ -284,19 +285,17 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
        </property>
        ```
 
-       
-
-#### IoC容器在Spring的实现
+## IoC 容器在 Spring 的实现
 
 1. BeanFactory
 
-   这是IoC容器的基本实现，是Spring内部使用的接口，面向Spring本身，不提供给开发人员
+   这是 IoC 容器的基本实现，是 Spring 内部使用的接口，面向 Spring 本身，不提供给开发人员
 
 2. ApplicationContext
 
-   这是BeanFactory的子接口，提供了更多的高级特性。面向Spring的使用者，几乎所有场合都是用ApplicationContext
+   这是 BeanFactory 的子接口，提供了更多的高级特性。面向 Spring 的使用者，几乎所有场合都是用 ApplicationContext
 
-### P15：XML管理Bean
+# P15：XML 管理 Bean
 
 <bean id="bean的唯一标识" class="bean的全路径"></bean>
 
@@ -310,7 +309,7 @@ private final Map<String, BeanDefinition> beanDefinitionMap; //将对象放入Ma
 </beans>
 ```
 
-获取bean的三种方式
+获取 bean 的三种方式
 
 ```java
 //读取配置文件
@@ -328,7 +327,7 @@ User user3 = context.getBean("user", User.class);
 System.out.println("根据id和类型获取bean：" + user3);
 ```
 
-根据类型获取Bean时 IoC容器中指定类型Bean只能有一个
+根据类型获取 Bean 时 IoC 容器中指定类型 Bean 只能有一个
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -341,7 +340,7 @@ System.out.println("根据id和类型获取bean：" + user3);
 </beans>
 ```
 
-如果组件类实现了接口可以通过接口获取bean 前提是bena唯一
+如果组件类实现了接口可以通过接口获取 bean 前提是 bena 唯一
 
 ```java
 public interface UserDao {
@@ -368,9 +367,9 @@ public static void main(String[] args) {
 }
 ```
 
- 如果一个接口有多个实现类并且配置了bean则会报错 bean不唯一
+如果一个接口有多个实现类并且配置了 bean 则会报错 bean 不唯一
 
-#### 特殊类型属性注入（对象类型属性注入，Map类型）
+## 特殊类型属性注入（对象类型属性注入，Map 类型）
 
 ```java
 public class Dept {
@@ -392,7 +391,7 @@ public class Emp {
 }
 ```
 
- 1. 引用外部Bean
+1.  引用外部 Bean
 
     ```xml
     <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
@@ -406,7 +405,7 @@ public class Emp {
     </bean>
     ```
 
- 2. 内部Bean
+2.  内部 Bean
 
     ```xml
     <!--
@@ -424,7 +423,7 @@ public class Emp {
     </bean>
     ```
 
- 3. 级联属性赋值
+3.  级联属性赋值
 
     ```xml
     <!--
@@ -441,7 +440,7 @@ public class Emp {
     </bean>
     ```
 
-  #### 数组类型注入
+## 数组类型注入
 
 ```xml
 <bean id="dept" class="com.sunl19ht.spring6.iocxml.ditest.Dept">
@@ -463,7 +462,8 @@ public class Emp {
 	</property>
 </bean>
 ```
-  #### 集合属性注入
+
+## 集合属性注入
 
 ```xml
 <bean id="emp1" class="com.sunl19ht.spring6.iocxml.ditest.Emp">
@@ -503,7 +503,9 @@ public class Emp {
         </property>
     </bean>
 ```
-#### Map类型注入
+
+## Map 类型注入
+
 ```xml
  <!-- 创建老师对象 -->
 <bean id="teacher1" class="com.sunl19ht.spring6.iocxml.dimap.Teacher">
@@ -542,7 +544,9 @@ public class Emp {
     </property>
 </bean>
 ```
-#### 引用集合类型的bean
+
+## 引用集合类型的 bean
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -591,7 +595,7 @@ public class Emp {
         <property name="teacherId" value="200"/>
         <property name="teacherName" value="李老师"/>
     </bean>
-    
+
     <bean id="student" class="com.sunl19ht.spring6.iocxml.dimap.Student">
         <property name="sID" value="1001"/>
         <property name="sName" value="张三"/>
@@ -600,17 +604,24 @@ public class Emp {
     </bean>
 </beans>
 ```
-#### p命名空间注入
+
+## p 命名空间注入
+
     导入P命名空间 xmlns:p="http://www.springframework.org/schema/p"
+
 ```xml
     <!-- p命名空间注入 -->
     <bean id="studentp" class="com.sunl19ht.spring6.iocxml.dimap.Student" p:sID="100" p:sName="sunl19ht" p:lessonsList-ref="lessonList" p:teacherMap-ref="teacherMap">
-    
+
     </bean>
 ```
-### P31：引入外部配置文件
-#### 数据库外部文件
+
+## P31：引入外部配置文件
+
+## 数据库外部文件
+
 1. 引入数据库相关依赖
+
 ```xml
 <!-- MySQL驱动 -->
 <dependency>
@@ -625,15 +636,19 @@ public class Emp {
     <artifactId>druid</artifactId>
     <version>1.2.15</version>
 </dependency>
- ```
-2. 创建外部配置文件，properties格式，定义数据信息 用户名 密码 地址等...
+```
+
+2. 创建外部配置文件，properties 格式，定义数据信息 用户名 密码 地址等...
+
 ```
     jdbc.user=root
     jdbc.password=123456
     jdbc.url=jdbc:mysql://localhost:3306/spring?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     jdbc.driver=com.mysql.cj.jdbc.Driver
 ```
-3. 创建spring的配置文件 引入context命名空间 引入属性文件 使用表达式完成注入
+
+3. 创建 spring 的配置文件 引入 context 命名空间 引入属性文件 使用表达式完成注入
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -655,14 +670,17 @@ public class Emp {
     </bean>
 </beans>
 ```
-### 32：Bean的作用域
+
+## 32：Bean 的作用域
+
 1. 概念
-在Spring中可以通过配置bean标签的scope属性来指定bena的作用域
-    ```xml
-    <bean id="user" class="com.sunl19ht.spring6.iocxml.life.User" scope="singleton" init-method="initMethod" destroy-method="destroyMethod">
-        scope设置bean的作用域
-    </bean>
-   ```
+   在 Spring 中可以通过配置 bean 标签的 scope 属性来指定 bena 的作用域
+   ```xml
+   <bean id="user" class="com.sunl19ht.spring6.iocxml.life.User" scope="singleton" init-method="initMethod" destroy-method="destroyMethod">
+   scope 设置 bean 的作用域
+   </bean>
+
+   ````
 
     singleton：单例模式（默认） 在IoC容器中这个bena的对象始终为单例 IoC容器初始化时创建
 
@@ -679,7 +697,7 @@ public class Emp {
        <!-- bean的后置处理器要放入ioc容器才能生效-->
        <bean id="myBeanPost" class="com.sunl19ht.spring6.iocxml.life.MyBeanPost"/>
       ```
-      
+
       ```java
       public class MyBeanPost implements BeanPostProcessor {
           @Override
@@ -709,9 +727,9 @@ public class Emp {
         2.6 bean对象创建完成
 
         2.7 bean销毁（配置指定销毁方法）
-    
+
         2.8 IoC容器关闭
-    
+
         ```xml
         <bean id="user" class="com.sunl19ht.spring6.iocxml.life.User" scope="singleton" init-method="initMethod" destroy-method="destroyMethod">
             init-method设置bean的初始化方法
@@ -719,7 +737,7 @@ public class Emp {
         </bean>
         ```
 
-   ### 36：自动装配
+   ## 36：自动装配
     使用自动装配实现
 
     不需要自己手动注入
@@ -729,7 +747,7 @@ public class Emp {
     controller：
         定义service类型属性
         生成service属性的set方法
-    
+
     service：
         定义dao类型属性
         生成dao属性的set方法
@@ -739,20 +757,20 @@ public class Emp {
     ```xml
         <bean id="userController" class="com.sunl19ht.spring6.iocxml.auto.controller.UserController" autowire="byType">
         </bean>
-    
+
         <bean id="userService" class="com.sunl19ht.spring6.iocxml.auto.service.UserServiceImpl" autowire="byType">
         </bean>
-    
+
         <bean id="userDao" class="com.sunl19ht.spring6.iocxml.auto.dao.UserDaoImpl" autowire="byType">
         </bean>
     ```
-   
+
     如果在IoC中没有找到任何一个兼容的bean则值为空
-    
+
     如果IoC中找到多个兼容的bean则抛出异常NoUniqueBeanDefinitionException
 
     根据名称注入
-    
+
     ```java
     UserController userController = new UserControllerImpl();
     ```
@@ -761,9 +779,13 @@ public class Emp {
     <bean id="userController" class="com.sunl19ht.spring6.iocxml.auto.controller.UserController" autowire="byName">
     </bean>
     ```
-### 38：Spring 注解属性注入bean
+   ````
+
+## 38：Spring 注解属性注入 bean
+
 1. 引入依赖
 2. 开启组件扫描
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
@@ -779,22 +801,26 @@ public class Emp {
 </beans>
 ```
 
-| 注解         | 说明                  |
-|------------|---------------------|
-| @Component | 该注解用于描述 Spring 中的 Bean，它是一个泛化的概念，仅仅表示容器中的一个组件（Bean），并且可以作用在应用的任何层次，例如 Service 层、Dao 层等。 使用时只需将该注解标注在相应类上即可。 |
-| @Repository | 该注解用于将数据访问层（Dao 层）的类标识为 Spring 中的 Bean，其功能与 @Component 相同。|
-|@Service | 该注解通常作用在业务层（Service 层），用于将业务层的类标识为 Spring 中的 Bean，其功能与 @Component 相同。|
-|@@Controller | 	该注解通常作用在控制层（如SpringMVC 的 Controller），用于将控制层的类标识为 Spring 中的 Bean，其功能与 @Component 相同。|
+| 注解         | 说明                                                                                                                                                                                    |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| @Component   | 该注解用于描述 Spring 中的 Bean，它是一个泛化的概念，仅仅表示容器中的一个组件（Bean），并且可以作用在应用的任何层次，例如 Service 层、Dao 层等。 使用时只需将该注解标注在相应类上即可。 |
+| @Repository  | 该注解用于将数据访问层（Dao 层）的类标识为 Spring 中的 Bean，其功能与 @Component 相同。                                                                                                 |
+| @Service     | 该注解通常作用在业务层（Service 层），用于将业务层的类标识为 Spring 中的 Bean，其功能与 @Component 相同。                                                                               |
+| @@Controller | 该注解通常作用在控制层（如 SpringMVC 的 Controller），用于将控制层的类标识为 Spring 中的 Bean，其功能与 @Component 相同。                                                               |
 
-### 39：Spring @Autowired注解注入bean
-1. bean对象创建
+## 39：Spring @Autowired 注解注入 bean
+
+1. bean 对象创建
+
 ```java
 @Service
 public class UserServiceImpl implements UserService {
-    
-}  
+
+}
 ```
+
 2. 定义相关属性，在属性上添加注解
+
 ```java
 // 方式1
 @Autowired
@@ -821,7 +847,8 @@ public UserController(@Autowired UserService userService) {
     this.userService = userService;
 }
 ```
-当有参数的构造方法只有一个时，@Autowired可以省略
+
+当有参数的构造方法只有一个时，@Autowired 可以省略
 
 ```java
 //方法5 当有参数的构造方法只有一个时，@Autowired可以省略
@@ -831,7 +858,9 @@ public UserController(UserService userService) {
     this.userService = userService;
 }
 ```
+
 @Autowired + @Qualifier(value = "属性名") 根据名称注入
+
 ```java
 @Repository
 public class RedisDaoImpl implements UserDao{
@@ -845,10 +874,13 @@ public class RedisDaoImpl implements UserDao{
 @Qualifier(value = "redisDaoImpl")
 private UserDao userDao;
 ```
-### 42：@Resource注入
-@Resource注解是JDK扩展包中的 不是Spring提供
-@Resource只能用在setter方法上
-JDK版本高于8或JDK高于11需要引入依赖
+
+## 42：@Resource 注入
+
+@Resource 注解是 JDK 扩展包中的 不是 Spring 提供
+@Resource 只能用在 setter 方法上
+JDK 版本高于 8 或 JDK 高于 11 需要引入依赖
+
 ```xml
 <dependency>
     <groupId>jakarta.annotation</groupId>
@@ -856,6 +888,7 @@ JDK版本高于8或JDK高于11需要引入依赖
     <version>2.1.1</version>
 </dependency>
 ```
+
 ```java
 @Controller("myUserController")
 public class UserController {
@@ -874,6 +907,7 @@ public class UserController {
 }
 
 ```
+
 ```java
 @Service("myUserService")
 public class UserServiceImpl implements UserService {
@@ -885,15 +919,20 @@ public class UserServiceImpl implements UserService {
     }
 }
 ```
-### 43：全注解开发 使用配置类代替配置文件
+
+## 43：全注解开发 使用配置类代替配置文件
+
 1. 创建配置类 开启组件扫描
+
 ```java
 @Configuration
 @ComponentScan("com.sunl19ht.spring6") //<context:component-scan base-package="com.sunl19ht.spring6"></context:component-scan>
 public class SpringConfig {
 }
 ```
+
 2. 启用配置类
+
 ```java
 public class TestUserControllerAnno {
     public static void main(String[] args) {

@@ -761,3 +761,145 @@ public class Emp {
     <bean id="userController" class="com.sunl19ht.spring6.iocxml.auto.controller.UserController" autowire="byName">
     </bean>
     ```
+### 38：Spring 注解属性注入bean
+1. 引入依赖
+2. 开启组件扫描
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--开启组件扫描功能-->
+    <!-- base-package：要扫描的包 指定的包及其子包下的所有类都会被扫描 -->
+    <context:component-scan base-package="com.sunl19ht.spring6"></context:component-scan>
+</beans>
+```
+
+| 注解         | 说明                  |
+|------------|---------------------|
+| @Component | 该注解用于描述 Spring 中的 Bean，它是一个泛化的概念，仅仅表示容器中的一个组件（Bean），并且可以作用在应用的任何层次，例如 Service 层、Dao 层等。 使用时只需将该注解标注在相应类上即可。 |
+| @Repository | 该注解用于将数据访问层（Dao 层）的类标识为 Spring 中的 Bean，其功能与 @Component 相同。|
+|@Service | 该注解通常作用在业务层（Service 层），用于将业务层的类标识为 Spring 中的 Bean，其功能与 @Component 相同。|
+|@@Controller | 	该注解通常作用在控制层（如SpringMVC 的 Controller），用于将控制层的类标识为 Spring 中的 Bean，其功能与 @Component 相同。|
+
+### 39：Spring @Autowired注解注入bean
+1. bean对象创建
+```java
+@Service
+public class UserServiceImpl implements UserService {
+    
+}  
+```
+2. 定义相关属性，在属性上添加注解
+```java
+// 方式1
+@Autowired
+UserService userService;
+
+// 方式2 set方法
+private UserService userService;
+@Autowired
+public void setUserService(UserService userService) {
+    this.userService = userService;
+}
+
+//方法3 构造方法
+private UserService userService;
+
+@Autowired
+public UserController(UserService userService) {
+    this.userService = userService;
+}
+
+//方法4 形参注入
+private UserService userService;
+public UserController(@Autowired UserService userService) {
+    this.userService = userService;
+}
+```
+当有参数的构造方法只有一个时，@Autowired可以省略
+
+```java
+//方法5 当有参数的构造方法只有一个时，@Autowired可以省略
+private UserService userService;
+
+public UserController(UserService userService) {
+    this.userService = userService;
+}
+```
+@Autowired + @Qualifier(value = "属性名") 根据名称注入
+```java
+@Repository
+public class RedisDaoImpl implements UserDao{
+    @Override
+    public void add() {
+        System.out.println("redis add");
+    }
+}
+// 最后的方式 使用两个注解根据名称进行注入
+@Autowired
+@Qualifier(value = "redisDaoImpl")
+private UserDao userDao;
+```
+### 42：@Resource注入
+@Resource注解是JDK扩展包中的 不是Spring提供
+@Resource只能用在setter方法上
+JDK版本高于8或JDK高于11需要引入依赖
+```xml
+<dependency>
+    <groupId>jakarta.annotation</groupId>
+    <artifactId>jakarta.annotation-api</artifactId>
+    <version>2.1.1</version>
+</dependency>
+```
+```java
+@Controller("myUserController")
+public class UserController {
+    //根据名称进行注入
+//    @Resource(name = "myUserService") //默认根据名称进行装配byName 未指定name使用属性名作为name 通过name找不要到会自动启动通过类型装配
+//    private UserService userService;
+
+    //根据类型匹配
+    @Resource
+    private UserService userService;
+
+    public void add() {
+        System.out.println("Controller.....");
+        userService.add();
+    }
+}
+
+```
+```java
+@Service("myUserService")
+public class UserServiceImpl implements UserService {
+    @Resource
+    private UserDao myUserDao;
+    @Override
+    public void add() {
+        myUserDao.add();
+    }
+}
+```
+### 43：全注解开发 使用配置类代替配置文件
+1. 创建配置类 开启组件扫描
+```java
+@Configuration
+@ComponentScan("com.sunl19ht.spring6") //<context:component-scan base-package="com.sunl19ht.spring6"></context:component-scan>
+public class SpringConfig {
+}
+```
+2. 启用配置类
+```java
+public class TestUserControllerAnno {
+    public static void main(String[] args) {
+        ApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
+        UserController controller = context.getBean(UserController.class);
+        controller.add();
+    }
+}
+```

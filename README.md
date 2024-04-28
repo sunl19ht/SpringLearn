@@ -655,4 +655,109 @@ public class Emp {
     </bean>
 </beans>
 ```
+### 32：Bean的作用域
+1. 概念
+在Spring中可以通过配置bean标签的scope属性来指定bena的作用域
+    ```xml
+    <bean id="user" class="com.sunl19ht.spring6.iocxml.life.User" scope="singleton" init-method="initMethod" destroy-method="destroyMethod">
+        scope设置bean的作用域
+    </bean>
+   ```
 
+    singleton：单例模式（默认） 在IoC容器中这个bena的对象始终为单例 IoC容器初始化时创建
+
+    prototype：多例模式  这个bena在IoC容器中有多个实例  在bean被获取时创建
+
+   2. bean生命周期
+
+       2.1 bean对象创建（调用无参构造）
+
+       2.2 给bean对象设置相关属性
+
+       2.3 bean后置处理器（初始化之前）
+        ```xml
+       <!-- bean的后置处理器要放入ioc容器才能生效-->
+       <bean id="myBeanPost" class="com.sunl19ht.spring6.iocxml.life.MyBeanPost"/>
+      ```
+      
+      ```java
+      public class MyBeanPost implements BeanPostProcessor {
+          @Override
+          public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+            return BeanPostProcessor.super.postProcessBeforeInitialization(bean, beanName);
+          }
+      }
+        ```
+
+       2.4 bean对象初始化
+
+       2.5 bean后置处理器（初始化之后）
+        ```xml
+       <!-- bean的后置处理器要放入ioc容器才能生效-->
+       <bean id="myBeanPost" class="com.sunl19ht.spring6.iocxml.life.MyBeanPost"/>
+      ```
+
+       ```java
+           public class MyBeanPost implements BeanPostProcessor {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+            }
+        }
+        ```
+
+        2.6 bean对象创建完成
+
+        2.7 bean销毁（配置指定销毁方法）
+    
+        2.8 IoC容器关闭
+    
+        ```xml
+        <bean id="user" class="com.sunl19ht.spring6.iocxml.life.User" scope="singleton" init-method="initMethod" destroy-method="destroyMethod">
+            init-method设置bean的初始化方法
+            destroy-method设置bean的销毁方法
+        </bean>
+        ```
+
+   ### 36：自动装配
+    使用自动装配实现
+
+    不需要自己手动注入
+
+    controller <-> service <-> dao
+
+    controller：
+        定义service类型属性
+        生成service属性的set方法
+    
+    service：
+        定义dao类型属性
+        生成dao属性的set方法
+
+    autowire="byType" 根据类型自动注入
+    autowire="byName" 根据属性名自动注入
+    ```xml
+        <bean id="userController" class="com.sunl19ht.spring6.iocxml.auto.controller.UserController" autowire="byType">
+        </bean>
+    
+        <bean id="userService" class="com.sunl19ht.spring6.iocxml.auto.service.UserServiceImpl" autowire="byType">
+        </bean>
+    
+        <bean id="userDao" class="com.sunl19ht.spring6.iocxml.auto.dao.UserDaoImpl" autowire="byType">
+        </bean>
+    ```
+   
+    如果在IoC中没有找到任何一个兼容的bean则值为空
+    
+    如果IoC中找到多个兼容的bean则抛出异常NoUniqueBeanDefinitionException
+
+    根据名称注入
+    
+    ```java
+    UserController userController = new UserControllerImpl();
+    ```
+    ```xml
+    要保证id标签的值和对象的变量名一致
+    <bean id="userController" class="com.sunl19ht.spring6.iocxml.auto.controller.UserController" autowire="byName">
+    </bean>
+    ```

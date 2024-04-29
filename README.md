@@ -1279,3 +1279,91 @@ public class AnnotationApplication implements ApplicationContext {
 ### 5. 实现bean容器接口 
 #### 5.1 返回对象 
 #### 5.2 根据包规则加载bean
+## P54：AOP代理模式
+### 静态代理
+```java
+package com.sunl19ht.srping6.aop.example;
+
+public class CalculatorStaticProxy implements Calculator{
+    private CalculatorImpl calculator;
+
+    public CalculatorStaticProxy(CalculatorImpl calculator) {
+        this.calculator = calculator;
+    }
+
+    @Override
+    public int add(int i, int j) {
+        System.out.println("日志记录：add(" + i + "," + j + ")");
+        int addResult = calculator.add(i, j);
+        System.out.println("日志记录：方法结束了 结果是：" + addResult);
+        return addResult;
+    }
+
+    @Override
+    public int sub(int i, int j) {
+        System.out.println("日志记录：add(" + i + "," + j + ")");
+        int subResult = calculator.sub(i, j);
+        System.out.println("日志记录：方法结束了 结果是：" + subResult);
+        return subResult;
+    }
+
+    @Override
+    public int mul(int i, int j) {
+        System.out.println("日志记录：add(" + i + "," + j + ")");
+        int mulResult = calculator.mul(i, j);
+        System.out.println("日志记录：方法结束了 结果是：" + mulResult);
+        return mulResult;
+    }
+
+    @Override
+    public int div(int i, int j) {
+        System.out.println("日志记录：add(" + i + "," + j + ")");
+        int divResult = calculator.div(i, j);
+        System.out.println("日志记录：方法结束了 结果是：" + divResult);
+        return divResult;
+    }
+}
+```
+### 动态代理
+```java
+package com.sunl19ht.srping6.aop.example;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+
+public class ProxyFactory {
+    private Object target;
+    public ProxyFactory(Object target) {
+        this.target = target;
+    }
+
+    //返回代理对象
+    public Object getProxy() {
+        /**
+         * 1. ClassLoader loader:加载动态生成类代理器的类加载器
+         * 2. Class<?>[] interfaces:指定目标对象实现的接口的类型，使用泛型方法确认类型
+         * 3. InvocationHandler h:指定代理对象实现目标对象的过程
+         */
+        ClassLoader classLoader = target.getClass().getClassLoader();
+        Class<?>[] interfaces = target.getClass().getInterfaces();
+        InvocationHandler h = new InvocationHandler() {
+            /**
+             * @param proxy  代理对象
+             * @param method 需要重写目标对象的方法
+             * @param args   method方法里的参数
+             * @return
+             * @throws Throwable
+             */
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                System.out.println("日志开始");
+                Object result = method.invoke(target, args);
+                System.out.println("日志结束");
+                return result;
+            }
+        };
+        return Proxy.newProxyInstance(classLoader, interfaces, h);
+    }
+}
+```

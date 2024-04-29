@@ -13,6 +13,7 @@
         <module>spring6-ioc-xml</module>
         <module>spring-annotation</module>
         <module>spring6-reflect</module>
+        <module>sunl19ht-spring</module>
     </modules>
 
     <properties>

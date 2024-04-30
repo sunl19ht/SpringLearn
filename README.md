@@ -1367,3 +1367,473 @@ public class ProxyFactory {
     }
 }
 ```
+## P55：AOP（面向切面编程）概念相关术语
+### 概念
+在不改变源代码的情况下动态给程序添加额外功能的一种技术，可以给各个部分进行隔离，使得业务逻辑耦合度降低，提高系统的可维护性和可扩展性。
+### 相关术语
+1. 横切关注点：即与业务逻辑无关的代码，如日志记录、安全控制、事务处理等。
+2. 通知（增强）：想要添加/增强的功能
+    2.1 前置通知：在目标方法执行之前执行
+    2.2 后置通知：在目标方法执行之后执行
+    2.3 环绕通知：在目标方法执行之前和之后执行
+    2.4 异常通知：在目标方法抛出异常时执行
+    2.5 最终通知：在目标方法执行之后执行
+3. 切面：封装通知方法的类
+4. 目标：被代理的对象
+5. 代理：向目标对象应用通知后创建的对象
+6. 连接点：spring中允许使用通知的地方
+7. 切入点：使用spring的aop技术可以通过切入点定位到指定的连接点
+## 56：基于注解的AOP实现
+### 1. 动态代理的分类
+1. JDK动态代理(有接口)：基于接口的动态代理，需要实现InvocationHandler接口，重写invoke方法，在invoke方法中调用目标对象的方法。
+interface←implement
+    ↑ 
+    proxy
+实现类和代理对象都要实现相同的接口
+
+2. cglib动态代理(无接口)：基于类的动态代理，需要实现MethodInterceptor接口，重写intercept方法，在intercept方法中调用目标对象的方法。
+生成子类代理对象，子类继承目标对象，重写目标对象的方法，在重写的方法中调用目标对象的方法。
+class ← extend
+
+3. AspectJ动态代理：基于类的动态代理，需要实现AspectJProxyFactory接口，重写getProxy方法，在getProxy方法中调用目标对象的方法。
+spring框架中提供了AspectJProxyFactory类，该类实现了AspectJProxyFactory接口，重写了getProxy方法，在getProxy方法中调用目标对象的方法。
+
+### 具体实现
+1. 引入具体依赖
+```xml
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-aop</artifactId>
+    <version>6.0.2</version>
+</dependency>
+
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-aspects</artifactId>
+    <version>6.0.6</version>
+</dependency>
+```
+2. 创建目标资源 接口 / 实现类
+```java
+package com.sunl19ht.srping6.aop.annoaop;
+
+public interface Calculator {
+    int add(int i, int j);
+    int sub(int i, int j);
+    int mul(int i, int j);
+    int div(int i, int j);
+}
+```
+```java
+package com.sunl19ht.srping6.aop.annoaop;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class CalculatorImpl implements Calculator {
+    @Override
+    public int add(int i, int j) {
+        int result = i + j;
+        System.out.println("方法内部 result = " + result);
+        // int a = 1 / 0; // Logger--->异常通知方法名称：add 异常信息：java.lang.ArithmeticException: / by zero
+        return result;
+    }
+
+    @Override
+    public int sub(int i, int j) {
+        int result = i - j;
+        System.out.println("方法内部 result = " + result);
+        return result;
+    }
+
+    @Override
+    public int mul(int i, int j) {
+        int result = i * j;
+        System.out.println("方法内部 result = " + result);
+        return result;
+    }
+
+    @Override
+    public int div(int i, int j) {
+        int result = i / j;
+        System.out.println("方法内部 result = " + result);
+        return result;
+    }
+}
+```
+3. 创建切面类 设置切入点 / 通知类型
+```java
+package com.sunl19ht.srping6.aop.annoaop;
+
+import org.apache.logging.log4j.core.tools.picocli.CommandLine;
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+
+//切面类
+@Aspect //切面类
+@Component  //IOC容器进行管理
+public class LogAspect {
+    //设置切入点和通知类型
+    //切入点表达式：execution(public int com.sunl19ht.srping6.aop.annoaop.CalculatorImpl.*(int,int)
+    //切入点表达式：execution(访问修饰符 返回值类型 方法所在类的全路径.方法名(参数列表)) *为任意路径 ..为任意参数
+    //通知类型：前置 返回 异常 后置 环绕
+//    @Before()
+    @Before(value = "execution(public int com.sunl19ht.srping6.aop.annoaop.CalculatorImpl.add(int, int))") //切入点表达式
+    public void beforeMethod(JoinPoint joinPoint) {
+        String methodName = joinPoint.getSignature().getName(); //增强方法的名字
+        Object[] args = joinPoint.getArgs();    //参数
+        System.out.println("Logger--->前置通知方法名称：" + methodName + " 参数：" + Arrays.toString(args));
+    }
+//    @AfterReturning()
+    @AfterReturning(value = "execution(public int com.sunl19ht.srping6.aop.annoaop.CalculatorImpl.add(int, int))", returning = "result") //returning 目标方法返回值
+    public void afterReturningMethod(JoinPoint joinPoint, Object result) { //Object 接收目标方法的返回值
+        String methodName = joinPoint.getSignature().getName(); //增强方法的名字
+        System.out.println("Logger--->返回通知方法名称：" + methodName + " 返回结果：" + result);
+    }
+//    @AfterThrowing() //出现异常会执行 并且获取异常信息
+    @AfterThrowing(value = "execution(public int com.sunl19ht.srping6.aop.annoaop.CalculatorImpl.add(int, int))", throwing = "ex")  //throwing 目标方法异常
+    public void afterThrowingMethod(JoinPoint joinPoint, Throwable ex) {    //Throwable 接收目标方法异常
+        String methodName = joinPoint.getSignature().getName(); //增强方法的名字
+        System.out.println("Logger--->异常通知方法名称：" + methodName + " 异常信息：" + ex);
+    }
+//    @After()
+    @After(value = "pointCut()")
+    public void afterMethod(JoinPoint joinPoint) {  //JoinPoint 接收通知方法的参数
+        String methodName = joinPoint.getSignature().getName(); //增强方法的名字
+        System.out.println("Logger--->后置通知方法名称：" + methodName);
+    }
+//    @Around()
+    @Around(value = "execution(public int com.sunl19ht.srping6.aop.annoaop.CalculatorImpl.add(int, int))")
+    public Object aroundMethod(ProceedingJoinPoint joinPoint) {
+        Object[] args = joinPoint.getArgs();
+        String argString = Arrays.toString(args);
+        Object result = null;
+        try {
+            System.out.println("环绕");
+            result = joinPoint.proceed();
+            System.out.println("目标方法返回值之后");
+        } catch (Throwable e) {
+            String string = e.toString();
+            System.out.println("目标方法出现异常" + string);
+        } finally {
+            System.out.println("执行完毕");
+        }
+        return result;
+    }
+
+    //重用切入点表达式
+    @Pointcut("execution(public int com.sunl19ht.srping6.aop.annoaop.CalculatorImpl.*(int, int))")
+    public void pointCut() {}
+}
+```
+## P61：Spring整合Junit
+### 添加相关依赖
+```xml
+ <!--spring对junit的支持相关依赖-->
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-test</artifactId>
+    <version>6.0.2</version>
+</dependency>
+<!--junit5测试-->
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <version>5.9.0</version>
+</dependency>
+```
+### 开启组件扫描
+```xml
+    <!-- 开启组件扫描 -->
+    <context:component-scan base-package="com.sunl19ht.spring6.junit"></context:component-scan>
+```
+### 创建测试类
+```java
+public class User {
+    public void run() {
+        System.out.println("run...");
+    }
+}
+```
+### Junit4测试
+```java
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration("classpath:bean.xml")
+public class SpringTestJunit4 {
+    @Autowired
+    private User user;
+
+    @Test
+    public void testUser() {
+        user.run();
+    }
+}
+```
+### Junit5测试
+```java
+@SpringJUnitConfig(locations = "classpath:bean.xml")
+//@ExtendWith(SpringExtension.class)
+//@ContextConfiguration("classpath:bean.xml"))
+public class SpringTestJunit5 {
+    @Autowired
+    private User user;
+
+    //测试方法
+    @Test
+    public void testUser() {
+        user.run();
+    }
+}
+```
+## Spring事务JdbcTemplate
+### 1. 引入相关依赖
+```xml
+<dependencies>
+    <!--spring jdbc  Spring 持久化层支持jar包-->
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-jdbc</artifactId>
+        <version>6.0.2</version>
+    </dependency>
+    <!-- MySQL驱动 -->
+    <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>8.0.30</version>
+    </dependency>
+    <!-- 数据源 -->
+    <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>druid</artifactId>
+        <version>1.2.15</version>
+    </dependency>
+</dependencies>
+ ```
+### 2. 创建jdbc.properties配置文件
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql://localhost:3306/spring?useUnicode=true&characterEncoding=utf-8
+jdbc.username=root
+jdbc.password=123456
+### 3. 创建beans.xml
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 导入外部属性文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties" />
+
+    <!-- 配置数据源 -->
+    <bean id="druidDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="username" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+    <!-- 配置 JdbcTemplate -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <!-- 装配数据源 -->
+        <property name="dataSource" ref="druidDataSource"/>
+    </bean>
+</beans>
+```
+### 创建数据库表
+```sql
+CREATE DATABASE `spring`;
+
+use `spring`;
+
+CREATE TABLE `t_emp` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) DEFAULT NULL COMMENT '姓名',
+  `age` int(11) DEFAULT NULL COMMENT '年龄',
+  `sex` varchar(2) DEFAULT NULL COMMENT '性别',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+### 创建测试类注入jdbcTemplate
+```java
+@SpringJUnitConfig(locations = "classpath:bean.xml")
+public class JdbcTemplateTest {
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Test
+    public void testUpdate() {
+        //1. 编写sql语句
+//        String sql = "insert into t_emp values(NULL, ?, ?, ?)";    // ? 表示占位符
+//
+//        //2. 调用jdbcTemplate的方法 传入参数
+//        int rows = jdbcTemplate.update(sql,  "东方不败", 20, "未知");  // 参数对应sql语句中的占位符
+//        System.out.println(rows);
+
+        //2. 修改
+//        String sql = "update t_emp set name = ? where id = ?";
+//        int rows = jdbcTemplate.update(sql, "东方不败atguigu", 1);
+
+        //3. 删除
+        String sql = "delete from t_emp where id = ?";
+        int rows = jdbcTemplate.update(sql, 1);
+    }
+}
+```
+### 查询返回对象
+```java
+ @Test
+    public void testSelectQuery() {
+        //1. 编写sql语句
+        String sql = "select * from t_emp where id = ?";
+
+        //2. 调用jdbcTemplate的方法 传入参数
+        /**
+         * 1. sql语句
+         * 2. 返回值类型
+         * 3. 传入参数
+         */
+        //写法1
+//        Emp empResult = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+//            Emp emp = new Emp();
+//            emp.setId(rs.getInt("id"));
+//            emp.setName(rs.getString("name"));
+//            emp.setAge(rs.getInt("age"));
+//            emp.setSex(rs.getString("sex"));
+//            return emp;
+//        }, 2);
+//        System.out.println(empResult);
+        //写法2
+        Emp empResult = jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(Emp.class), 2);
+        System.out.println(empResult);
+    }
+```
+### 查询返回集合
+```java
+//查询: 返回List集合
+    @Test
+    public void testSelectList() {
+        String sql = "select * from t_emp";
+        List<Emp> list = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Emp.class));
+        System.out.println(list);
+    }
+```
+### 查询返回单个值
+```java
+    @Test
+    public void testSelectValue() {
+        String sql = "select count(*) from t_emp";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class);
+        System.out.println(count);
+    }
+```
+## P65：声明式事务概念
+1. 事务：一组操作，要么全部成功，要么全部失败
+2. 事务的特性 ACID
+   * 原子性：事务中的操作要么全部完成，要么全部不完成，不会结束在中间某个环节
+   * 一致性：操作前和操作后数据库的结构是一致的
+   * 隔离性：多个事务操作只有事务提交后才有影响
+   * 持久性：事务一旦提交，结果就会持久化到数据库中
+### 开启事务
+```xml
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="druidDataSource"></property>
+    </bean>
+
+    <!--
+        开启事务的注解驱动
+        通过注解@Transactional所标识的方法或标识的类中所有的方法，都会被事务管理器管理事务
+    -->
+    <!-- transaction-manager属性的默认值是transactionManager，如果事务管理器bean的id正好就是这个默认值，则可以省略这个属性 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+```
+```java
+@Service
+public class BookServiceImpl implements BookService {
+    @Autowired
+    private BookDao bookDao;
+
+    /**
+     * @Transactional
+     * 1.加在类上，表示当前类所有方法都添加事务
+     * 2.加在方法上，表示当前方法添加事务
+     * 只读 只能查询查询操作
+     * 超时时间 超过超时时间后，自动回滚
+     * 回滚策略 设置哪些异常不回滚
+     * 隔离级别 读问题
+     * 传播行为 事务方法之间调用事务如何使用
+     */
+    @Override
+    @Transactional //添加事务
+    public void buyBook(Integer bookId, Integer userId) {
+        //图书id查询图书价格
+        Integer price = bookDao.getBookPriceByBookId(bookId);
+        //更新图书库存量-1
+        bookDao.updateStock(bookId);
+        //更新用户余额 - 图书价格
+        bookDao.updateUserBalance(userId, price);
+    }
+}
+```
+### 隔离级别
+| 隔离级别 | 脏读 | 不可重复读 | 幻读 |
+|:----------------:|:--:|:-----:|:--:|
+| READ UNCOMMITTED | 有 |有 | 有  |
+| READ COMMITTED | 无  | 有 | 有  |
+| REPEATABLE READ | 无 | 无 | 有  |
+| SERIALIZABLE | 无 | 无 | 无  |
+
+### 传播行为
+@Transactional(propagation = Propagation.REQUIRED) //默认
+方法a有事务调用方法b，方法b有事务，a执行过程中调用了b是如何传递的？合并到一个事务？还是开启新事务？这就是事务传播行为
+* REQUIRED 支持当前事务 如果不存在就新建一个事务
+* REQUIRES_NEW 新建事务 如果当前存在事务，把当前事务挂起 不管有没有直接新建一个事务 开启的新事物和之前的事务不存在嵌套关系之前事务被挂起
+### 全注解开发
+```java
+package com.sunl19ht.spring6.tx.config;
+
+import com.alibaba.druid.pool.DruidDataSource;
+import com.sunl19ht.spring6.jdbc.JdbcTemplateTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
+
+@Configuration
+@ComponentScan("com.sunl19ht.spring6.tx")
+@EnableTransactionManagement //开启事务管理
+public class SpringConfig {
+    @Bean
+    public DataSource getDataSource() {
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        druidDataSource.setUrl("jdbc:mysql://localhost:3306/spring?characterEncoding=utf8&useSSL=false");
+        druidDataSource.setUsername("root");
+        druidDataSource.setPassword("123456");
+        return druidDataSource;
+    }
+
+    @Bean
+    public JdbcTemplate getJdbcTemplate(DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
+    @Bean
+    public DataSourceTransactionManager getDataSourceTransactionManager(DataSource dataSource) {
+        DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+        dataSourceTransactionManager.setDataSource(dataSource);
+        return dataSourceTransactionManager;
+    }
+}
+```
